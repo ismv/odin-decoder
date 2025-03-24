@@ -59,19 +59,9 @@ main :: proc() {
 
         current_chunk := buffer[index : index + current_chunk_len]
 
+        // 8086 uses 6 byte instruction queue but we currently can only process 2 byte instructions (4 with displacements).
         if len(current_chunk) == 2 {
-            d_flag: byte = (current_chunk[0] >> 1) & 1
-            w_flag: byte = current_chunk[0] & 1
-            reg: byte = (current_chunk[1] >> 3) & 0b_111
-            rm: byte = current_chunk[1] & 0b_111
-    
-            destination, source: byte = reg, rm
-            if d_flag == 0 {
-                destination, source = rm, reg
-            }
-    
-            fmt.printf("%v %v, %v", decode_instruction(current_chunk[0]), decode_register_field(destination, w_flag), decode_register_field(source, w_flag))
-            fmt.println(" ")
+            effective_address_calculation(current_chunk)
         } else {
             fmt.eprintln("Warning: Incomplete chunk at the end of the file.")
             break
